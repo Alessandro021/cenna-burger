@@ -18,6 +18,7 @@ web-build/
 
 # Metro
 .metro-health-check*
+cenna-burger.code-workspace
 
 # debug
 npm-debug.*
