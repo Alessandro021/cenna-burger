@@ -5,6 +5,7 @@ import {CATEGORIES, MENU} from "@/utils/data/products"
 import { useCallback, useState, useRef } from "react";
 import { Product, ProductDataProps } from "@/components/product";
 import { Link } from "expo-router";
+import { useCartStore } from "@/stores/cart-store";
 
 interface ItemProps {
     item: string
@@ -12,8 +13,15 @@ interface ItemProps {
 
 const Home = () => {
 
+  const cartStore = useCartStore()
+
   const [ category , setCategory ] = useState<string>(CATEGORIES[0])
   const sectionListRef = useRef<SectionList>(null)
+
+  const cartQuantityItens = cartStore.products.reduce((acc, item) => { 
+    acc = acc + item.quantity
+    return acc
+  }, 0)
 
   const renderItem = useCallback(({item}: ItemProps) => (
     <CategoryButton title={item} isSelected={item === category} onPress={() => handleCategorySelect(item)} />
@@ -39,7 +47,7 @@ const Home = () => {
   }
 return(
     <View className="bg-slate-900 flex-1">
-       <Header cartQuantityItems={1000} title="Faça seu pedido" />
+       <Header cartQuantityItems={cartQuantityItens} title="Faça seu pedido" />
       
     <FlatList
     className="max-h-10 mt-5"
