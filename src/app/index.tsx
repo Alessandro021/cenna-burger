@@ -4,6 +4,7 @@ import {View, Text, FlatList, SectionList} from "react-native"
 import {CATEGORIES, MENU} from "@/utils/data/products"
 import { useCallback, useState, useRef } from "react";
 import { Product, ProductDataProps } from "@/components/product";
+import { Link } from "expo-router";
 
 interface ItemProps {
     item: string
@@ -19,7 +20,9 @@ const Home = () => {
   ),[category])
 
   const renderItemSectionList = useCallback(({item}: any) => (
-    <Product data={item} />
+    <Link href={`/product/${item.id}`} asChild>
+      <Product data={item} />
+    </Link>
   ),[])
 
   const handleCategorySelect = (selectedCategory: string) => {
