@@ -8,11 +8,12 @@ import {createJSONStorage, persist} from "zustand/middleware"
 export type ProductCartProps = ProductProps & {
     quantity: number
 }
-
+ 
 interface StateProps { 
     products: ProductCartProps[]
     add: (product: ProductProps) => void
     remove: (productId: string) => void
+    clear: () => void
 }
 
 export const useCartStore = create(persist<StateProps>(set => ({
@@ -22,6 +23,9 @@ export const useCartStore = create(persist<StateProps>(set => ({
     })),
     remove: (productId: string) =>  set(state => ({
         products: cartInMemory.remove(state.products, productId)
+    })),
+    clear: () => set(() => ({
+        products: []
     }))
 }), {
     name: "cenna-burger:cart",

@@ -1,17 +1,20 @@
 import { Header } from "@/components/header"
-import { Alert, FlatList, Text, View } from "react-native"
+import { Alert, FlatList, Linking, Text, View } from "react-native"
 import { Product } from "@/components/product"
 import { ProductCartProps, useCartStore } from "@/stores/cart-store"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { formatCurrency } from "@/utils/functions/format-currency"
 import { Input } from "@/components/input"
 import { Button } from "@/components/button"
 import { Feather } from "@expo/vector-icons"
 import { LinkButton } from "@/components/link-button"
+import { useNavigation } from "expo-router"
 
 const Cart = () => {
 
-    const {products, remove} = useCartStore()
+    const {products, remove, clear} = useCartStore()
+    const [address, setAddress] = useState<string>("")
+    const navigation = useNavigation()
 
     const total = formatCurrency(products.reduce((acc, product) => {
         const preco = product.price * product.quantity
@@ -27,6 +30,30 @@ const Cart = () => {
                 onPress: () => remove(product.id)
             }
         ])
+    }
+
+    const handleOrder = () => {
+        if(address.trim().length === 0) {
+            return Alert.alert("Pedido", "Informe os dados da entrega.")
+        }
+
+        const myProducts = products.map(product => `\n ${product.quantity} ${product.title }`).join("")
+
+        const message = `
+            NOVO PEDIDO
+            \n Entregar em: ${address}
+            ${myProducts}
+            \n Valor total: ${total}
+        `
+
+        Linking.openURL(`https://api.whatsapp.com/send?phone=${process.env.EXPO_PUBLIC_TELEPHONE}&text=${message}`)
+
+        clear()
+        setAddress("")
+        navigation.goBack()
+
+        Alert.alert("Pedido realizado", "O seu pedido já esta sendo preparado.")
+
     }
 
     const renderItem = useCallback( ({item}: any) => <Product data={item} onPress={() => handleProductRemove(item)} /> ,[products])
@@ -54,11 +81,11 @@ const Cart = () => {
                 <Text className="text-lime-400 text-2xl font-heading">{total}</Text>
             </View>
 
-            <Input placeholder="Informe o endereço de entrega com rua, bairro, CEP, número e complemento..." />
+            <Input value={address} onSubmitEditing={handleOrder} blurOnSubmit={true} returnKeyType="next" onChangeText={setAddress} placeholder="Informe o endereço de entrega com rua, bairro, CEP, número e complemento..." />
          </View>
 
          <View className="p-5 gap-5">
-            <Button>
+            <Button disabled={products?.length === 0 ? true : false} onPress={handleOrder} >
                 <Button.Text>Enviar pedido</Button.Text>
                 <Button.Icon>
                     <Feather name="arrow-right-circle" size={20} />
